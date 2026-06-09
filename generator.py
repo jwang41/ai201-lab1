@@ -32,7 +32,6 @@ def generate_response(query, retrieved_chunks):
     """
     Generate a grounded answer from retrieved rule chunks.
 
-    TODO — Milestone 3:
 
     `retrieved_chunks` is the list returned by retrieve(). Each item is a dict:
       - "text"     : the chunk text

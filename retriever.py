@@ -50,7 +50,6 @@ def retrieve(query, n_results=N_RESULTS):
     """
     Find the most relevant rule chunks for a user's question.
 
-    TODO — Milestone 2:
 
     Use _collection.query() to run a semantic search. It takes:
       - query_texts : a list containing your query string
