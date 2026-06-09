@@ -116,11 +116,30 @@ handle these cases better, at the cost of more implementation complexity.
 **Actual chunk count produced across all 8 rule books:**
 
 ```
-[your answer here]
+
+Game	Chunks
+Monopoly	23
+Clue	21
+Risk	20
+Catan	18
+Pandemic	18
+Uno	17
+Codenames	16
+Ticket to Ride	16
+Total	149
+
 ```
 
 **One thing that surprised you or didn't match your expectations:**
 
 ```
-[your answer here]
+Chunk count tracks raw document length almost perfectly — roughly one
+chunk per 250 characters (chunk_size - overlap) — and is completely
+blind to game complexity. Monopoly produced the most chunks (23) only
+because its source text is the longest (5,727 chars), not because it's
+the most intricate game. Pandemic, arguably a more complex game, yielded
+just 18 chunks because its text file is shorter (4,443 chars). I had
+expected rule-heavy games to dominate the database, but the character-
+based splitter just measures how verbose the source text is, not how
+rich the rules are.
 ```

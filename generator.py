@@ -3,6 +3,30 @@ from config import GROQ_API_KEY, LLM_MODEL
 
 _client = Groq(api_key=GROQ_API_KEY)
 
+SYSTEM_PROMPT = (
+    "You are RulesBot, a board-game rules assistant. Answer the user's "
+    "question using ONLY the information in the SOURCES provided in the user "
+    "message. The sources are excerpts from official rule books. Do not use "
+    "any outside knowledge of these games, and do not guess or infer rules "
+    "that are not stated in the sources, even if you think you know the "
+    "answer. "
+    "\n\n"
+    "Each source is labelled with the game it comes from (e.g. "
+    "'[Source 1 — Catan]'). State which game your answer is about at the "
+    "start of your response, e.g. 'In Catan, ...'. If the relevant sources "
+    "come from more than one game, answer each game separately and label each "
+    "clearly, rather than blending rules from different games into one answer."
+    "\n\n"
+    "If the sources do not contain enough information to answer the question, "
+    "do not fill the gap from memory. Instead reply along these lines: "
+    "\"I couldn't find that in the rules I have for [game(s) in context]. The "
+    "loaded rule books don't seem to cover this, so I'd rather not guess. You "
+    "could try rephrasing, or it may be a rule that isn't in the summaries I "
+    "was given.\" "
+    "A short, honest 'the rules I have don't cover that' is always better "
+    "than a confident answer that isn't supported by the sources."
+)
+
 
 def generate_response(query, retrieved_chunks):
     """
@@ -35,5 +59,23 @@ def generate_response(query, retrieved_chunks):
             "Try rephrasing your question — or check that your ingestion pipeline is working."
         )
 
-    # Your implementation here.
-    return "⚙️ Response generation not yet implemented. Complete Milestone 3 to activate answers."
+    # Format the ranked chunks into one labelled, numbered context block.
+    # Order is preserved (most relevant first); distances are intentionally
+    # omitted — they're an internal ranking signal, not useful to the model.
+    sources = "\n\n".join(
+        f"[Source {i} — {chunk['game']}]\n{chunk['text']}"
+        for i, chunk in enumerate(retrieved_chunks, start=1)
+    )
+
+    user_message = f"SOURCES:\n{sources}\n\nQUESTION:\n{query}"
+
+    response = _client.chat.completions.create(
+        model=LLM_MODEL,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_message},
+        ],
+        temperature=0.2,  # faithful extraction, not creative writing
+    )
+
+    return response.choices[0].message.content
